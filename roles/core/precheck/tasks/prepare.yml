@@ -99,19 +99,41 @@
   register: scale_prepare_firewalldnfrpm
   when: ansible_pkg_mgr == 'dnf'
 
-- name: prepare | Stop and disable firewall
+- name: prepare | Enable and start firewalld
   service:
     name: firewalld
-    state: stopped
+    state: started
     enabled: false
   failed_when: false
   changed_when: false
   when:
-    - scale_prepare_disable_firewall | bool
     - ("'installed' in scale_prepare_firewallrpm.results | map(attribute='yumstate') | list") or
       ("'installed' in scale_prepare_firewalldnfrpm.results | map(attribute='yumstate') | list")
 
-#
+- name: firewall | GPFS Cluster internal zone
+  copy:
+    src: cluster-internal.xml
+    dest: /usr/lib/firewalld/zones/cluster-internal.xml
+  notify: reload-firewalld
+
+- name: firewall | Firewall gpfs-daemon service
+  copy:
+    src: gpfs-daemon.xml
+    dest: /usr/lib/firewalld/services/gpfs-daemon.xml
+  notify: reload-firewalld
+
+- name: firewall | Firewall gpfs performance monitoring service
+  copy:
+    src: gpfs-perfmon.xml
+    dest: /usr/lib/firewalld/services/gpfs-perfmon.xml
+  notify: reload-firewalld
+
+- name: firewall | Firewall ipset for daemon network addresses
+  copy:
+    src: daemon-network.xml
+    dest: /usr/lib/firewalld/ipsets/daemon-network.xml
+  notify: reload-firewalld
+
 # Install prereq RPMs
 #
 - name: prepare | Install prerequisite RPMs

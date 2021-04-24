@@ -31,3 +31,8 @@
     timeout: 300
   delegate_to: localhost
 # handlers file for precheck
+
+- name: reload-firewalld
+  service:
+    name: firewalld
+    state: reloaded

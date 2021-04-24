@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>perfmon</short>
+  <description>Spectrum Scale performance monitoring</description>
+  <port port="4739" protocol="tcp"/>
+  <port port="4739" protocol="udp"/>
+  <port port="8123" protocol="tcp"/>
+  <port port="8124" protocol="tcp"/>
+  <port port="8125" protocol="tcp"/>
+  <port port="8126" protocol="tcp"/>
+  <port port="8127" protocol="tcp"/>
+  <port port="9084" protocol="tcp"/>
+  <port port="9085" protocol="tcp"/>
+  <port port="9094" protocol="tcp"/>
+</service>

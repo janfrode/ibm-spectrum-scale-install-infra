@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <description>Spectrum Scale daemon</description>
+  <short>mmfsd</short>
+  <port port="1191" protocol="tcp"/>
+  <port port="60000-61000" protocol="tcp"/>
+</service>
