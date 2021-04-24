@@ -134,6 +134,18 @@
     dest: /usr/lib/firewalld/ipsets/daemon-network.xml
   notify: reload-firewalld
 
+- name: cluster | Identify ip addresses for daemon network
+  set_fact:
+    scale_ip_list: "{{ scale_ip_list | default([]) + [hostvars[item].ansible_default_ipv4.address] }}"
+  with_items:
+    - "{{ ansible_play_hosts }}"
+  run_once: true
+  delegate_to: localhost
+
+- name: firewall | update ipset
+  shell: firewall-cmd --permanent --ipset=daemon-network --add-entry={{ item }}
+  with_items: "{{ scale_ip_list }}"
+
 # Install prereq RPMs
 #
 - name: prepare | Install prerequisite RPMs
