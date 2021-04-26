@@ -145,6 +145,10 @@
 - name: firewall | update ipset
   shell: firewall-cmd --permanent --ipset=daemon-network --add-entry={{ item }}
   with_items: "{{ scale_ip_list }}"
+  register: firewallcmd
+  changed_when:
+    - '"ALREADY_ENABLED" not in firewallcmd.stderr'
+    - '"success" in firewallcmd.stdout'
   notify: reload-firewalld
 
 # Install prereq RPMs
