@@ -134,9 +134,10 @@
     dest: /usr/lib/firewalld/ipsets/daemon-network.xml
   notify: reload-firewalld
 
+# We might not know which address is the daemon address at this point, so we initially open fw for all addresses on each host:
 - name: cluster | Identify ip addresses for daemon network
   set_fact:
-    scale_ip_list: "{{ scale_ip_list | default([]) + [hostvars[item].ansible_default_ipv4.address] }}"
+     scale_ip_list: "{{ scale_ip_list | default([]) + [hostvars[item].ansible_all_ipv4_addresses] }}"
   with_items:
     - "{{ ansible_play_hosts }}"
   run_once: true
