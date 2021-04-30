@@ -95,14 +95,14 @@
       command:
         /usr/lpp/mmfs/bin/mmcrfs {{ item.item }}
         -F /var/mmfs/tmp/StanzaFile.new.{{ item.item }}
-        -B {{ scale_storage_fsparams[item.item].blockSize | default(scale_storage_filesystem_defaults.blockSize) }}
-        -M {{ scale_storage_fsparams[item.item].maxMetadataReplicas | default(scale_storage_filesystem_defaults.maxMetadataReplicas) }}
-        -m {{ scale_storage_fsparams[item.item].defaultMetadataReplicas | default(scale_storage_filesystem_defaults.defaultMetadataReplicas) }}
-        -R {{ scale_storage_fsparams[item.item].maxDataReplicas | default(scale_storage_filesystem_defaults.maxDataReplicas) }}
-        -r {{ scale_storage_fsparams[item.item].defaultDataReplicas | default(scale_storage_filesystem_defaults.defaultDataReplicas) }}
-        -n {{ scale_storage_fsparams[item.item].numNodes | default(scale_storage_filesystem_defaults.numNodes) }}
-        -A {{ 'yes' if scale_storage_fsparams[item.item].automaticMountOption | default(scale_storage_filesystem_defaults.automaticMountOption) else 'no' }}
-        -T {{ scale_storage_fsparams[item.item].defaultMountPoint | default(scale_storage_filesystem_defaults.defaultMountPoint_prefix + item.item) }}
+        {{ ( '-B ' + scale_storage_fsparams[item.item].blockSize if scale_storage_fsparams[item.item].blockSize is defined else '') }}
+        {{ ( '-M ' + scale_storage_fsparams[item.item].maxMetadataReplicas if scale_storage_fsparams[item.item].maxMetadataReplicas is defined else '') }}
+        {{ ( '-m ' + scale_storage_fsparams[item.item].defaultMetadataReplicas if scale_storage_fsparams[item.item].defaultMetadataReplicas is defined else '') }}
+        {{ ( '-R ' + scale_storage_fsparams[item.item].maxDataReplicas if scale_storage_fsparams[item.item].maxDataReplicas is defined else '') }}
+        {{ ( '-r ' + scale_storage_fsparams[item.item].defaultDataReplicas if scale_storage_fsparams[item.item].defaultDataReplicas is defined else '') }}
+        {{ ( '-n ' + scale_storage_fsparams[item.item].numNodes if scale_storage_fsparams[item.item].numNodes is defined else '') }}
+        {{ ( '-T ' + scale_storage_fsparams[item.item].defaultMountPoint if scale_storage_fsparams[item.item].defaultMountPoint is defined else '') }}
+        {{ ( '-A no' if scale_storage_fsparams[item.item].automaticMountOption is defined and not scale_storage_fsparams[item.item].automaticMountOption else '') }}
         {{ ( '--metadata-block-size ' + scale_storage_fsparams[item.item].metadatablocksize) if scale_storage_fsparams[item.item].metadatablocksize is defined else '' }}
       when:
         - item.item not in scale_storage_existing_fs.stdout_lines
@@ -130,7 +130,7 @@
     - name: storage | Mount new filesystem(s)
       command: /usr/lpp/mmfs/bin/mmmount {{ item }} -a
       when:
-        - scale_storage_fsparams[item].automaticMountOption | default(scale_storage_filesystem_defaults.automaticMountOption)
+        - scale_storage_fsparams[item].automaticMountOption | default(True)
       with_items: "{{ scale_storage_fsdef | unique }}"
       changed_when: false
       register: scale_mount_fs

@@ -125,12 +125,15 @@
       command:
         /usr/lpp/mmfs/bin/mmcrfs {{ item.item }}
         -F /var/mmfs/tmp/StanzaFile.new.{{ item.item }}
-        -B {{ scale_storage_fsparams[item.item].blockSize | default(scale_storage_filesystem_defaults.blockSize) }}
-        -m {{ scale_storage_fsparams[item.item].defaultMetadataReplicas | default(scale_storage_filesystem_defaults.defaultMetadataReplicas) }}
-        -r {{ scale_storage_fsparams[item.item].defaultDataReplicas | default(scale_storage_filesystem_defaults.defaultDataReplicas) }}
-        -n {{ scale_storage_fsparams[item.item].numNodes | default(scale_storage_filesystem_defaults.numNodes) }}
-        -A {{ 'yes' if scale_storage_fsparams[item.item].automaticMountOption | default(scale_storage_filesystem_defaults.automaticMountOption) else 'no' }}
-        -T {{ scale_storage_fsparams[item.item].defaultMountPoint | default(scale_storage_filesystem_defaults.defaultMountPoint_prefix + item.item) }}
+        {{ ( '-B ' + scale_storage_fsparams[item.item].blockSize if scale_storage_fsparams[item.item].blockSize is defined else '') }}
+        {{ ( '-M ' + scale_storage_fsparams[item.item].maxMetadataReplicas if scale_storage_fsparams[item.item].maxMetadataReplicas is defined else '') }}
+        {{ ( '-m ' + scale_storage_fsparams[item.item].defaultMetadataReplicas if scale_storage_fsparams[item.item].defaultMetadataReplicas is defined else '') }}
+        {{ ( '-R ' + scale_storage_fsparams[item.item].maxDataReplicas if scale_storage_fsparams[item.item].maxDataReplicas is defined else '') }}
+        {{ ( '-r ' + scale_storage_fsparams[item.item].defaultDataReplicas if scale_storage_fsparams[item.item].defaultDataReplicas is defined else '') }}
+        {{ ( '-n ' + scale_storage_fsparams[item.item].numNodes if scale_storage_fsparams[item.item].numNodes is defined else '') }}
+        {{ ( '-T ' + scale_storage_fsparams[item.item].defaultMountPoint if scale_storage_fsparams[item.item].defaultMountPoint is defined else '') }}
+        {{ ( '-A no' if scale_storage_fsparams[item.item].automaticMountOption is defined and (scale_storage_fsparams[item.item].automaticMountOption|bool) == false else '') }}
+        {{ ( '--metadata-block-size ' + scale_storage_fsparams[item.item].metadatablocksize) if scale_storage_fsparams[item.item].metadatablocksize is defined else '' }}
       when:
         - item.item not in scale_storage_existing_fs.stdout_lines
         - item.size > 1
@@ -141,7 +144,7 @@
       when:
         - item.item not in scale_storage_existing_fs.stdout_lines
         - item.size > 1
-        - scale_storage_fsparams[item.item].automaticMountOption | default(scale_storage_filesystem_defaults.automaticMountOption)
+        - scale_storage_fsparams[item.item].automaticMountOption | default(True)
       with_items: "{{ scale_storage_stanzafile_new.results }}"
 
 #
@@ -298,13 +301,14 @@
     - name: storage | Change online filesystem parameters
       command:
         /usr/lpp/mmfs/bin/mmchfs {{ item.key }}
-        -m {{ item.value.defaultMetadataReplicas | default(scale_storage_filesystem_defaults.defaultMetadataReplicas) }}
-        -r {{ item.value.defaultDataReplicas | default(scale_storage_filesystem_defaults.defaultDataReplicas) }}
-        -n {{ item.value.numNodes | default(scale_storage_filesystem_defaults.numNodes) }}
-        -A {{ 'yes' if item.value.automaticMountOption | default(scale_storage_filesystem_defaults.automaticMountOption) else 'no' }}
+        {{ ( '-m ' + item.value.defaultMetadataReplicas if item.value.defaultMetadataReplicas is defined else '') }}
+        {{ ( '-r ' + item.value.defaultDataReplicas if item.value.defaultDataReplicas is defined else '') }}
+        {{ ( '-n ' + item.value.numNodes if item.value.numNodes is defined else '') }}
+        {{ ( '-A no' if item.value.automaticMountOption is defined and (item.value.automaticMountOption|bool) == false else '') }}
       when:
         - item.key in scale_storage_changed_fs | default([])
       with_dict: "{{ scale_storage_fsparams | default({}) }}"
+
 
     - name: storage | Change offline filesystem parameters
       command:
